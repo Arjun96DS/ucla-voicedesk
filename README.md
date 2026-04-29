@@ -311,9 +311,8 @@ Dark theme optimized for extended workplace use, with high-contrast status badge
 
 **Arjun Sunke**  
 Instructor, Cloud & IT, Central New Mexico Community College  
-[LinkedIn](https://linkedin.com/in/YOUR_HANDLE) · [GitHub](https://github.com/YOUR_USERNAME)
+[LinkedIn](https://www.linkedin.com/in/arjunsunke/)) · [GitHub]((https://github.com/Arjun96DS))
 
 ---
 
 *Built as a portfolio demonstration for the UCLA Software Developer application.*  
-*Deadline: April 30, 2026*
