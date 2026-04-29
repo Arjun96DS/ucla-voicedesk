@@ -1,5 +1,3 @@
-// 
-
 import { useState, useCallback, useRef, useEffect } from 'react';
 
 const SUPPORTED = typeof window !== 'undefined' &&
@@ -15,7 +13,7 @@ export function useVoice({ onTranscript, onError } = {}) {
 
   const stopListening = useCallback(() => {
     if (recognitionRef.current) {
-      recognitionRef.current.stop();
+      recognitionRef.current.abort();
       recognitionRef.current = null;
     }
     setIsListening(false);
@@ -24,7 +22,7 @@ export function useVoice({ onTranscript, onError } = {}) {
 
   const startListening = useCallback(() => {
     if (!SUPPORTED) {
-      const msg = 'Voice input is not supported in this browser. Try Chrome or Edge.';
+      const msg = 'Voice input is not supported. Try Chrome.';
       setError(msg);
       onError?.(msg);
       return;
@@ -33,7 +31,6 @@ export function useVoice({ onTranscript, onError } = {}) {
     if (recognitionRef.current) {
       recognitionRef.current.abort();
       recognitionRef.current = null;
-      setIsListening(false);
     }
 
     setError(null);
@@ -43,43 +40,34 @@ export function useVoice({ onTranscript, onError } = {}) {
 
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     const recognition = new SpeechRecognition();
-    recognition.continuous = true;
-    recognition.interimResults = true;
+
+    recognition.continuous = false;
+    recognition.interimResults = false;
     recognition.lang = 'en-US';
     recognition.maxAlternatives = 1;
 
-    recognition.onstart = () => setIsListening(true);
+    recognition.onstart = () => {
+      setIsListening(true);
+      setError(null);
+    };
 
     recognition.onresult = (event) => {
-      let interim = '';
-      let final = '';
-      for (let i = event.resultIndex; i < event.results.length; i++) {
-        const result = event.results[i];
-        if (result.isFinal) {
-          final += result[0].transcript;
-        } else {
-          interim += result[0].transcript;
-        }
-      }
-      if (final) {
-        finalTranscriptRef.current += final;
-        setTranscript(finalTranscriptRef.current);
-      }
-      setInterimTranscript(interim);
+      const transcript = Array.from(event.results)
+        .map(result => result[0].transcript)
+        .join('');
+      finalTranscriptRef.current = transcript;
+      setTranscript(transcript);
     };
 
     recognition.onerror = (event) => {
-      let msg = 'Voice recognition error';
+      if (event.error === 'aborted') return;
+      let msg = 'Voice recognition error: ' + event.error;
       if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
-        msg = 'Microphone access denied. Please allow microphone access.';
+        msg = 'Microphone access denied.';
       } else if (event.error === 'no-speech') {
         msg = 'No speech detected. Please try again.';
       } else if (event.error === 'network') {
-        msg = 'Network error during voice recognition.';
-      } else if (event.error === 'audio-capture') {
-        msg = 'No microphone found. Please connect a microphone.';
-      } else if (event.error === 'aborted') {
-        return;
+        msg = 'Network error. Please try again.';
       }
       setError(msg);
       onError?.(msg);
@@ -98,18 +86,7 @@ export function useVoice({ onTranscript, onError } = {}) {
     };
 
     recognitionRef.current = recognition;
-
-    setTimeout(() => {
-      try {
-        if (recognitionRef.current) {
-          recognitionRef.current.start();
-        }
-      } catch (err) {
-        setError('Failed to start voice recognition. Please try again.');
-        setIsListening(false);
-        recognitionRef.current = null;
-      }
-    }, 300);
+    recognition.start();
 
   }, [onTranscript, onError]);
 
@@ -135,6 +112,9 @@ export function useVoice({ onTranscript, onError } = {}) {
     startListening,
     stopListening,
     toggleListening,
-    clearTranscript: () => { setTranscript(''); finalTranscriptRef.current = ''; },
+    clearTranscript: () => {
+      setTranscript('');
+      finalTranscriptRef.current = '';
+    },
   };
 }
