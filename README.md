@@ -13,7 +13,7 @@ VoiceDesk lets UCLA employees speak natural language commands to interact with u
 
 ## 🎬 Demo
 
-**Live Demo:** [https://ucla-voicedesk-frontend.onrender.com](https://ucla-voicedesk-frontend.onrender.com)
+**Live Demo:** [https://voicedesk-frontend.onrender.com](https://voicedesk-frontend.onrender.com)
 
 **Demo credentials:**
 - Email: `demo@ucla.edu`
