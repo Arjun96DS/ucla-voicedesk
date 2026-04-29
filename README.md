@@ -311,7 +311,7 @@ Dark theme optimized for extended workplace use, with high-contrast status badge
 
 **Arjun Sunke**  
 Instructor, Cloud & IT, Central New Mexico Community College  
-[LinkedIn](https://www.linkedin.com/in/arjunsunke/)) · [GitHub]((https://github.com/Arjun96DS))
+[LinkedIn](https://www.linkedin.com/in/arjunsunke/)) · [GitHub](https://github.com/Arjun96DS))
 
 ---
 
