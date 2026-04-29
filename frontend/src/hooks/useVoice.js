@@ -1,3 +1,5 @@
+// 
+
 import { useState, useCallback, useRef, useEffect } from 'react';
 
 const SUPPORTED = typeof window !== 'undefined' &&
@@ -26,6 +28,12 @@ export function useVoice({ onTranscript, onError } = {}) {
       setError(msg);
       onError?.(msg);
       return;
+    }
+
+    if (recognitionRef.current) {
+      recognitionRef.current.abort();
+      recognitionRef.current = null;
+      setIsListening(false);
     }
 
     setError(null);
@@ -62,12 +70,21 @@ export function useVoice({ onTranscript, onError } = {}) {
 
     recognition.onerror = (event) => {
       let msg = 'Voice recognition error';
-      if (event.error === 'not-allowed') msg = 'Microphone access denied. Please allow microphone access.';
-      else if (event.error === 'no-speech') msg = 'No speech detected. Please try again.';
-      else if (event.error === 'network') msg = 'Network error during voice recognition.';
+      if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
+        msg = 'Microphone access denied. Please allow microphone access.';
+      } else if (event.error === 'no-speech') {
+        msg = 'No speech detected. Please try again.';
+      } else if (event.error === 'network') {
+        msg = 'Network error during voice recognition.';
+      } else if (event.error === 'audio-capture') {
+        msg = 'No microphone found. Please connect a microphone.';
+      } else if (event.error === 'aborted') {
+        return;
+      }
       setError(msg);
       onError?.(msg);
       setIsListening(false);
+      recognitionRef.current = null;
     };
 
     recognition.onend = () => {
@@ -81,12 +98,19 @@ export function useVoice({ onTranscript, onError } = {}) {
     };
 
     recognitionRef.current = recognition;
-    try {
-      recognition.start();
-    } catch (err) {
-      setError('Failed to start voice recognition');
-      setIsListening(false);
-    }
+
+    setTimeout(() => {
+      try {
+        if (recognitionRef.current) {
+          recognitionRef.current.start();
+        }
+      } catch (err) {
+        setError('Failed to start voice recognition. Please try again.');
+        setIsListening(false);
+        recognitionRef.current = null;
+      }
+    }, 150);
+
   }, [onTranscript, onError]);
 
   const toggleListening = useCallback(() => {
