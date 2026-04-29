@@ -109,7 +109,7 @@ export function useVoice({ onTranscript, onError } = {}) {
         setIsListening(false);
         recognitionRef.current = null;
       }
-    }, 150);
+    }, 300);
 
   }, [onTranscript, onError]);
 
