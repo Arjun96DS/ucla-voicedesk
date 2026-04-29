@@ -30,7 +30,7 @@ export default function Layout() {
 
   const { isPassiveListening, wakeDetected } = useWakeWord({
     onWake: handleWake,
-    enabled: true,
+    enabled: false,
   });
 
   const active = wakeDetected || wakeDetectedLocal;
